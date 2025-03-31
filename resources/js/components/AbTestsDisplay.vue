@@ -3,6 +3,9 @@ import { ref, onMounted, computed } from "vue";
 import axios from "axios";
 import { defineProps } from 'vue';
 
+const openA = ref(false);
+const openB = ref(false);
+
 const abTestData = ref([]);
 const abVisitorsData = ref([]);
 const abVisitorsDataA = ref([]);
@@ -22,6 +25,10 @@ const abUniqueConversionsB = ref([]);
 const uniqueConversionRate = ref([]);
 const uniqueConversionRateA = ref([]);
 const uniqueConversionRateB = ref([]);
+const abMobileVisitsA = ref([]);
+const abMobileVisitsB = ref([]);
+const abDesktopVisitsA = ref([]);
+const abDesktopVisitsB = ref([]);
 
 const props = defineProps({
     test_id: {
@@ -75,6 +82,19 @@ const fetchData = async () => {
         uniqueConversionRate.value = parseFloat((abUniqueConversions.value / abVisitorsData.value) * 100).toFixed(2);
         uniqueConversionRateA.value = parseFloat((abUniqueConversionsA.value / abVisitorsDataA.value) * 100).toFixed(2);
         uniqueConversionRateB.value = parseFloat((abUniqueConversionsB.value / abVisitorsDataB.value) * 100).toFixed(2);
+
+        //Mobile Visits
+        const uniqueMobileA = filteredVersionA.filter(item => item.device_type === 'mobile');
+        abMobileVisitsA.value = uniqueMobileA.length;
+        const uniqueMobileB = filteredVersionB.filter(item => item.device_type == 'mobile');
+        abMobileVisitsB.value = uniqueMobileB.length;
+
+        //Desktop Visits
+        const uniqueDesktopA = filteredVersionA.filter(item => item.device_type == 'desktop');
+        abDesktopVisitsA.value = uniqueDesktopA.length;
+        const uniqueDesktopB = filteredVersionB.filter(item => item.device_type == 'desktop');
+        abDesktopVisitsB.value = uniqueDesktopB.length;
+
     } catch (error) {
         console.error("Error fetching data:", error);
     }
@@ -103,6 +123,15 @@ const formatDate = (dateString) => {
 const dataTableFiltered = computed(() => {
     return abTestData.value.filter(item => item.test_id == props.test_id);
 });
+
+//Toggle Dropdown
+function toggleDropdown(version) {
+    if (version === 'A') {
+        openA.value = !openA.value;
+    } else if (version === 'B') {
+        openB.value = !openB.value;
+    }
+}
 
 //Datatable
 const columns = [
@@ -186,69 +215,98 @@ const options = {
         <br>
 
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Version A Section -->
+        <div class="space-y-4">
+            <!-- Version A Dropdown -->
             <div class="bg-gray-900 p-4 rounded-lg shadow-lg text-white">
-                <h3 class="text-lg font-bold mb-4 text-center">Version A</h3>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="p-3 bg-gray-800 rounded-lg text-center">
-                        <p class="text-sm font-semibold">Visitors</p>
-                        <p class="text-xl font-bold">{{ abVisitorsDataA }}</p>
-                    </div>
-                    <div class="p-3 bg-gray-800 rounded-lg text-center">
-                        <p class="text-sm font-semibold">Views</p>
-                        <p class="text-xl font-bold">{{ abPageViewDataA }}</p>
-                    </div>
-                    <div class="p-3 bg-gray-800 rounded-lg text-center">
-                        <p class="text-sm font-semibold">Conversions</p>
-                        <p class="text-xl font-bold">{{ abConversionDataA }}</p>
-                    </div>
-                    <div class="p-3 bg-gray-800 rounded-lg text-center">
-                        <p class="text-sm font-semibold">Conversion Rate</p>
-                        <p class="text-xl font-bold">{{ abConversionRateA }}%</p>
-                    </div>
-                    <div class="p-3 bg-gray-800 rounded-lg text-center">
-                        <p class="text-sm font-semibold">Unique Conversions</p>
-                        <p class="text-xl font-bold">{{ abUniqueConversionsA }}</p>
-                    </div>
-                    <div class="p-3 bg-gray-800 rounded-lg text-center">
-                        <p class="text-sm font-semibold">Unique Conversion Rate</p>
-                        <p class="text-xl font-bold">{{ uniqueConversionRateA }}%</p>
+                <button @click="toggleDropdown('A')"
+                    class="w-full text-left text-lg font-bold flex justify-between items-center">
+                    Version A
+                    <svg :class="{ 'rotate-180': openA }" class="w-5 h-5 transition-transform transform" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div v-show="openA" class="mt-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-3 bg-gray-800 rounded-lg text-center">
+                            <p class="text-sm font-semibold">Visitors</p>
+                            <p class="text-xl font-bold">{{ abVisitorsDataA }}</p>
+                        </div>
+                        <div class="p-3 bg-gray-800 rounded-lg text-center">
+                            <p class="text-sm font-semibold">Views</p>
+                            <p class="text-xl font-bold">{{ abPageViewDataA }}</p>
+                        </div>
+                        <div class="p-3 bg-gray-800 rounded-lg text-center">
+                            <p class="text-sm font-semibold">Conversions</p>
+                            <p class="text-xl font-bold">{{ abConversionDataA }}</p>
+                        </div>
+                        <div class="p-3 bg-gray-800 rounded-lg text-center">
+                            <p class="text-sm font-semibold">Conversion Rate</p>
+                            <p class="text-xl font-bold">{{ abConversionRateA }}%</p>
+                        </div>
+                        <div class="p-3 bg-gray-800 rounded-lg text-center">
+                            <p class="text-sm font-semibold">Unique Conversions</p>
+                            <p class="text-xl font-bold">{{ abUniqueConversionsA }}</p>
+                        </div>
+                        <div class="p-3 bg-gray-800 rounded-lg text-center">
+                            <p class="text-sm font-semibold">Unique Conversion Rate</p>
+                            <p class="text-xl font-bold">{{ uniqueConversionRateA }}%</p>
+                        </div>
+                        <div class="p-3 bg-gray-800 rounded-lg text-center">
+                            <p class="text-sm font-semibold">Mobile Visits : Desktop Visits</p>
+                            <p class="text-xl font-bold">{{ abMobileVisitsA }}<span class="mx-4">:</span>{{
+                                abDesktopVisitsA }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Version B Section -->
+            <!-- Version B Dropdown -->
             <div class="bg-gray-900 p-4 rounded-lg shadow-lg text-white">
-                <h3 class="text-lg font-bold mb-4 text-center">Version B</h3>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="p-3 bg-gray-800 rounded-lg text-center">
-                        <p class="text-sm font-semibold">Visitors</p>
-                        <p class="text-xl font-bold">{{ abVisitorsDataB }}</p>
-                    </div>
-                    <div class="p-3 bg-gray-800 rounded-lg text-center">
-                        <p class="text-sm font-semibold">Views</p>
-                        <p class="text-xl font-bold">{{ abPageViewDataB }}</p>
-                    </div>
-                    <div class="p-3 bg-gray-800 rounded-lg text-center">
-                        <p class="text-sm font-semibold">Conversions</p>
-                        <p class="text-xl font-bold">{{ abConversionDataB }}</p>
-                    </div>
-                    <div class="p-3 bg-gray-800 rounded-lg text-center">
-                        <p class="text-sm font-semibold">Conversion Rate</p>
-                        <p class="text-xl font-bold">{{ abConversionRateB }}%</p>
-                    </div>
-                    <div class="p-3 bg-gray-800 rounded-lg text-center">
-                        <p class="text-sm font-semibold">Unique Conversions</p>
-                        <p class="text-xl font-bold">{{ abUniqueConversionsB }}</p>
-                    </div>
-                    <div class="p-3 bg-gray-800 rounded-lg text-center">
-                        <p class="text-sm font-semibold">Unique Conversion Rate</p>
-                        <p class="text-xl font-bold">{{ uniqueConversionRateB }}%</p>
+                <button @click="toggleDropdown('B')"
+                    class="w-full text-left text-lg font-bold flex justify-between items-center">
+                    Version B
+                    <svg :class="{ 'rotate-180': openB }" class="w-5 h-5 transition-transform transform" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div v-show="openB" class="mt-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-3 bg-gray-800 rounded-lg text-center">
+                            <p class="text-sm font-semibold">Visitors</p>
+                            <p class="text-xl font-bold">{{ abVisitorsDataB }}</p>
+                        </div>
+                        <div class="p-3 bg-gray-800 rounded-lg text-center">
+                            <p class="text-sm font-semibold">Views</p>
+                            <p class="text-xl font-bold">{{ abPageViewDataB }}</p>
+                        </div>
+                        <div class="p-3 bg-gray-800 rounded-lg text-center">
+                            <p class="text-sm font-semibold">Conversions</p>
+                            <p class="text-xl font-bold">{{ abConversionDataB }}</p>
+                        </div>
+                        <div class="p-3 bg-gray-800 rounded-lg text-center">
+                            <p class="text-sm font-semibold">Conversion Rate</p>
+                            <p class="text-xl font-bold">{{ abConversionRateB }}%</p>
+                        </div>
+                        <div class="p-3 bg-gray-800 rounded-lg text-center">
+                            <p class="text-sm font-semibold">Unique Conversions</p>
+                            <p class="text-xl font-bold">{{ abUniqueConversionsB }}</p>
+                        </div>
+                        <div class="p-3 bg-gray-800 rounded-lg text-center">
+                            <p class="text-sm font-semibold">Unique Conversion Rate</p>
+                            <p class="text-xl font-bold">{{ uniqueConversionRateB }}%</p>
+                        </div>
+                        <div class="p-3 bg-gray-800 rounded-lg text-center">
+                            <p class="text-sm font-semibold">Mobile Visits : Desktop Visits</p>
+                            <p class="text-xl font-bold">{{ abMobileVisitsB }}<span class="mx-4">:</span>{{
+                                abDesktopVisitsB }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
 
 
 

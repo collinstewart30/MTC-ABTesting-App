@@ -8,6 +8,22 @@ import { ZiggyVue } from 'ziggy-js';
 import { initializeTheme } from './composables/useAppearance';
 import DataTablesLib from 'datatables.net';
 import DataTable from 'datatables.net-vue3';
+import collapse from '@alpinejs/collapse';
+import Alpine from 'alpinejs';
+
+declare global {
+    interface Window {
+        Alpine: any;
+    }
+}
+
+window.Alpine = Alpine;
+// Register the plugin
+Alpine.plugin(collapse);
+// Initialize Alpine after Vue is initialized (or after DOMContentLoaded)
+document.addEventListener('DOMContentLoaded', () => {
+    Alpine.start();
+});
 
 DataTable.use(DataTablesLib);
 
